@@ -11,6 +11,10 @@ interface Annotation {
 interface DocumentViewerProps {
   content: string;
   title?: string;
+  inputText: string;
+  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onInputSubmit: () => void;
+  isLoading: boolean;
 }
 
 const Container = styled.div`
@@ -46,41 +50,37 @@ const Controls = styled.div`
 
 const MainArea = styled.div`
   display: flex;
-  flex: 1;
-  min-height: 0;
-`;
-
-const Sidebar = styled.div`
-  width: 80px;
-  background: #23272f;
-  color: #b0b4bb;
-  padding: 1rem 0;
-  display: flex;
   flex-direction: column;
   align-items: center;
-  border-right: 1px solid #22252b;
+  flex: 1;
+  min-height: 0;
+  padding: 2rem;
 `;
 
-const PageNumber = styled.div<{active?: boolean}>`
-  width: 48px;
-  height: 64px;
-  margin-bottom: 1rem;
+const TextInputWrapper = styled.div`
+  width: 100%;
   display: flex;
-  align-items: center;
   justify-content: center;
+  margin-bottom: 1.5rem;
+`;
+
+const TextInput = styled.input`
+  width: 350px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e1e4e8;
   border-radius: 6px;
-  background: ${({active}) => active ? '#fff' : 'transparent'};
-  color: ${({active}) => active ? '#23272f' : '#b0b4bb'};
-  font-weight: 600;
-  font-size: 1.2rem;
-  box-shadow: ${({active}) => active ? '0 2px 8px rgba(0,0,0,0.08)' : 'none'};
-  cursor: pointer;
-  border: ${({active}) => active ? '1.5px solid #007bff' : '1.5px solid transparent'};
+  font-size: 1rem;
+  background: #fff;
+  color: #23272f;
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+  }
 `;
 
 const DocumentArea = styled.div`
-  flex: 1;
-  margin: 2.5rem auto;
+  margin: 0 auto;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.10);
@@ -89,7 +89,10 @@ const DocumentArea = styled.div`
   min-width: 0;
   max-width: 800px;
   overflow-y: auto;
-  height: calc(100vh - 5rem);
+  height: calc(100vh - 5rem - 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 `;
 
 const AnnotationMarker = styled.div<{ x: number; y: number; color: string }>`
@@ -130,15 +133,46 @@ const Button = styled.button`
   }
 `;
 
-const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title }) => {
+const LoadingWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1.5rem 0;
+`;
+
+const Spinner = styled.div`
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 0.5rem;
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+const LoadingOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.7);
+  z-index: 10;
+`;
+
+const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title, inputText, onInputChange, onInputSubmit, isLoading }) => {
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
   const [selectedAnnotation, setSelectedAnnotation] = useState<Annotation | null>(null);
   const [isAddingAnnotation, setIsAddingAnnotation] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
-
-  // For now, just one page
-  const pages = [1];
-  const [currentPage] = useState(1);
 
   const handleDocumentClick = (e: React.MouseEvent) => {
     if (!isAddingAnnotation) return;
@@ -168,29 +202,51 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title }) => {
     ));
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      onInputSubmit();
+    }
+  };
+
   return (
     <Container>
       <TopBar>
-        <Title>{title || 'Untitled Document'}</Title>
+        <Title>{title || 'Scrutinize: Powered by DeepSeek'}</Title>
         <Controls>
           <Button onClick={() => setIsAddingAnnotation(true)}>
             Add Annotation
           </Button>
-          {/* Placeholder controls */}
-          <Button disabled style={{background:'#23272f',color:'#b0b4bb',cursor:'default'}}>Zoom</Button>
-          <Button disabled style={{background:'#23272f',color:'#b0b4bb',cursor:'default'}}>Download</Button>
         </Controls>
       </TopBar>
       <MainArea>
-        <Sidebar>
-          {pages.map((page) => (
-            <PageNumber key={page} active={page === currentPage}>{page}</PageNumber>
-          ))}
-        </Sidebar>
-        <DocumentArea ref={documentRef} onClick={handleDocumentClick}>
-          <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.7', fontSize: '1.1rem', color: '#23272f' }}>
+        <TextInputWrapper>
+          <TextInput
+            type="text"
+            placeholder="Enter your essay topic..."
+            value={inputText}
+            onChange={onInputChange}
+            onKeyDown={handleKeyDown}
+            disabled={isLoading}
+          />
+          <Button
+            style={{ marginLeft: 12 }}
+            onClick={onInputSubmit}
+            disabled={isLoading || !inputText.trim()}
+          >
+            {isLoading ? 'Generating...' : 'Generate Essay'}
+          </Button>
+        </TextInputWrapper>
+        <DocumentArea ref={documentRef} onClick={handleDocumentClick} style={{ position: 'relative', pointerEvents: isLoading ? 'none' : 'auto' }}>
+          <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.7', fontSize: '1.1rem', color: '#23272f', filter: isLoading ? 'blur(2px)' : 'none', transition: 'filter 0.2s' }}>
             {content}
           </div>
+          {isLoading && (
+            <LoadingOverlay>
+              <Spinner />
+              <div style={{ color: '#23272f', marginTop: 8, fontWeight: 500 }}>Generating your essay...</div>
+            </LoadingOverlay>
+          )}
           {annotations.map(annotation => (
             <AnnotationMarker
               key={annotation.id}
