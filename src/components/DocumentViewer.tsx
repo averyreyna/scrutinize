@@ -26,7 +26,7 @@ const Container = styled.div`
   flex-direction: column;
   height: 100vh;
   background: #23272f;
-  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  font-family: 'ABC Diatype', 'Inter', 'Segoe UI', Arial, sans-serif;
 `;
 
 const TopBar = styled.div`

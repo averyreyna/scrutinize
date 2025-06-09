@@ -86,6 +86,7 @@ const ToolbarContainer = styled.div<{ isVisible: boolean }>`
   align-items: flex-start;
   transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  font-family: 'ABC Diatype', sans-serif;
 `;
 
 const ToggleButton = styled.button`
