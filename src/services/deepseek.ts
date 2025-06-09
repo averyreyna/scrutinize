@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 
@@ -8,6 +8,17 @@ interface DeepSeekResponse {
       content: string;
     };
   }>;
+}
+
+export class APIError extends Error {
+  constructor(
+    message: string,
+    public statusCode?: number,
+    public originalError?: unknown
+  ) {
+    super(message);
+    this.name = 'APIError';
+  }
 }
 
 export const generateEssay = async (topic: string): Promise<string> => {
@@ -39,7 +50,43 @@ export const generateEssay = async (topic: string): Promise<string> => {
 
     return response.data.choices[0].message.content;
   } catch (error) {
+    if (error instanceof AxiosError) {
+      if (error.response?.status === 500) {
+        throw new APIError(
+          'The server encountered an unexpected error. Please try again in a few moments.',
+          500,
+          error
+        );
+      }
+      
+      if (error.response?.status === 401) {
+        throw new APIError(
+          'Authentication failed. Please check your API key.',
+          401,
+          error
+        );
+      }
+
+      if (error.response?.status === 429) {
+        throw new APIError(
+          'Rate limit exceeded. Please try again in a few moments.',
+          429,
+          error
+        );
+      }
+
+      throw new APIError(
+        `API request failed: ${error.message}`,
+        error.response?.status,
+        error
+      );
+    }
+
     console.error('Error generating essay:', error);
-    throw new Error('Failed to generate essay');
+    throw new APIError(
+      'An unexpected error occurred while generating the essay.',
+      undefined,
+      error
+    );
   }
 }; 

@@ -57,6 +57,7 @@ export const ANNOTATION_GROUPS = {
 
 interface AnnotationToolbarProps {
   onSelectAnnotation: (code: string, description: string, color: string) => void;
+  selectedAnnotation?: { code: string; description: string; color: string } | null;
 }
 
 const SIDEBAR_OFFSET_VISIBLE = 64; // px from right edge for the sidebar
@@ -134,10 +135,10 @@ const GroupTitle = styled.div<{ color: string }>`
   background: none;
 `;
 
-const AnnotationButton = styled.button<{ color: string }>`
-  background: #fff;
+const AnnotationButton = styled.button<{ color: string; isSelected: boolean }>`
+  background: ${props => props.isSelected ? props.color + '20' : '#fff'};
   color: ${props => props.color};
-  border: 1px solid ${props => props.color}30;
+  border: 1.5px solid ${props => props.isSelected ? props.color : props.color + '30'};
   border-radius: 4px;
   padding: 0.25rem 0.5rem;
   font-size: 0.82rem;
@@ -148,7 +149,7 @@ const AnnotationButton = styled.button<{ color: string }>`
   flex-direction: column;
   gap: 0.1rem;
   min-height: 32px;
-  box-shadow: none;
+  box-shadow: ${props => props.isSelected ? `0 0 0 1px ${props.color}40` : 'none'};
   margin-bottom: 1px;
 
   &:hover {
@@ -169,7 +170,7 @@ const AnnotationButton = styled.button<{ color: string }>`
   }
 `;
 
-const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({ onSelectAnnotation }) => {
+const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({ onSelectAnnotation, selectedAnnotation }) => {
   const [isVisible, setIsVisible] = useState(true);
 
   return (
@@ -191,6 +192,7 @@ const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({ onSelectAnnotatio
               <AnnotationButton
                 key={code}
                 color={group.color}
+                isSelected={selectedAnnotation?.code === code}
                 onClick={() => onSelectAnnotation(code, description, group.color)}
               >
                 <span className="code">{code}</span>

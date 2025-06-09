@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { generateEssay } from '../services/deepseek';
+import { generateEssay, APIError } from '../services/deepseek';
+import ErrorNotification from './ErrorNotification';
 
 const Container = styled.div`
   max-width: 800px;
@@ -55,11 +56,22 @@ const LoadingMessage = styled.div`
   margin: 2rem 0;
 `;
 
+const ErrorMessage = styled.div`
+  color: #dc3545;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+`;
+
 const EssayGenerator: React.FC = () => {
   const [topic, setTopic] = useState('');
   const [essay, setEssay] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showErrorNotification, setShowErrorNotification] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,12 +79,20 @@ const EssayGenerator: React.FC = () => {
 
     setIsLoading(true);
     setError(null);
+    setShowErrorNotification(false);
 
     try {
       const generatedEssay = await generateEssay(topic);
       setEssay(generatedEssay);
     } catch (err) {
-      setError('Failed to generate essay. Please try again.');
+      if (err instanceof APIError) {
+        setError(err.message);
+        if (err.statusCode === 500) {
+          setShowErrorNotification(true);
+        }
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -94,8 +114,14 @@ const EssayGenerator: React.FC = () => {
       </Form>
 
       {isLoading && <LoadingMessage>Generating your essay...</LoadingMessage>}
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {error && !showErrorNotification && <ErrorMessage>{error}</ErrorMessage>}
       {essay && <EssayContent>{essay}</EssayContent>}
+      {showErrorNotification && (
+        <ErrorNotification
+          message={error || 'An unexpected error occurred'}
+          onDismiss={() => setShowErrorNotification(false)}
+        />
+      )}
     </Container>
   );
 };

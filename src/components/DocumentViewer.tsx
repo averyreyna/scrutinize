@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import AnnotationToolbar from './AnnotationToolbar';
+import SuggestionsPanel from './SuggestionsPanel';
 
 interface Annotation {
   id: string;
@@ -63,15 +64,25 @@ const Controls = styled.div`
 
 const MainArea = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  align-items: flex-start;
   flex: 1;
   min-height: 0;
   padding: 2rem;
 
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
+    flex-direction: column;
+    align-items: center;
     padding: 1rem;
   }
+`;
+
+const ContentColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
 `;
 
 const TextInputWrapper = styled.div`
@@ -298,6 +309,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title, inputTe
     const focusOffset = selection.focusOffset;
     let start = Math.min(anchorOffset, focusOffset);
     let end = Math.max(anchorOffset, focusOffset);
+    
     // Try to find the selected text in the content
     const idx = contentText.indexOf(selectedText);
     if (idx !== -1) {
@@ -370,93 +382,98 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title, inputTe
         <Title>{title || 'Scrutinize: Powered by DeepSeek'}</Title>
       </TopBar>
       <MainArea>
-        <TextInputWrapper>
-          <TextInput
-            type="text"
-            placeholder="Enter your essay topic..."
-            value={inputText}
-            onChange={onInputChange}
-            onKeyDown={handleKeyDown}
-            disabled={isLoading}
-          />
-          <Button
-            style={{ marginLeft: 12 }}
-            onClick={onInputSubmit}
-            disabled={isLoading || !inputText.trim()}
-          >
-            {isLoading ? 'Generating...' : 'Generate Essay'}
-          </Button>
-        </TextInputWrapper>
-        <DocumentArea ref={documentRef} style={{ position: 'relative', pointerEvents: isLoading ? 'none' : 'auto' }}>
-          <div
-            style={{ whiteSpace: 'pre-wrap', lineHeight: '1.7', fontSize: '1.1rem', color: '#23272f', filter: isLoading ? 'blur(2px)' : 'none', transition: 'filter 0.2s' }}
-            onMouseUp={handleTextSelection}
-          >
-            {renderContentWithHighlights()}
-          </div>
-          {isLoading && (
-            <LoadingOverlay>
-              <Spinner />
-              <div style={{ color: '#23272f', marginTop: 8, fontWeight: 500 }}>Generating your essay...</div>
-            </LoadingOverlay>
-          )}
-          {/* Annotation popup on highlight hover, keep visible if tooltip hovered */}
-          {showPopup && popupAnnotation && popupPosition && (
-            <div
-              style={{
-                position: 'fixed',
-                left: popupPosition.x,
-                top: popupPosition.y - 48,
-                background: '#fff',
-                border: `1.5px solid ${popupAnnotation.color}`,
-                borderRadius: 6,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-                padding: '0.7rem 1rem',
-                minWidth: 200,
-                zIndex: 2000,
-                pointerEvents: 'auto',
-              }}
-              onMouseEnter={() => setIsTooltipHovered(true)}
-              onMouseLeave={() => {
-                setIsTooltipHovered(false);
-                setHoveredAnnotationId(null);
-                setShowPopup(false);
-              }}
+        <SuggestionsPanel />
+        <ContentColumn>
+          <TextInputWrapper>
+            <TextInput
+              type="text"
+              placeholder="Enter your essay topic..."
+              value={inputText}
+              onChange={onInputChange}
+              onKeyDown={handleKeyDown}
+              disabled={isLoading}
+            />
+            <Button
+              style={{ marginLeft: 12 }}
+              onClick={onInputSubmit}
+              disabled={isLoading || !inputText.trim()}
             >
-              <div style={{ color: popupAnnotation.color, fontWeight: 700, marginBottom: 2 }}>{popupAnnotation.code}</div>
-              <div style={{ fontSize: '0.92em', color: '#444', marginBottom: 6 }}>{popupAnnotation.description}</div>
-              {editingAnnotationId === popupAnnotation.id ? (
-                <>
-                  <textarea
-                    value={editText}
-                    onChange={e => setEditText(e.target.value)}
-                    style={{ width: '100%', minHeight: 60, marginBottom: 8, borderRadius: 4, border: '1px solid #ddd', padding: 6, fontSize: '1em' }}
-                    placeholder="Add specific feedback..."
-                    autoFocus
-                  />
-                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                    <button onClick={handleSaveEdit} style={{ background: popupAnnotation.color, color: '#fff', border: 'none', borderRadius: 4, padding: '4px 12px', fontWeight: 500, cursor: 'pointer' }}>Save</button>
-                    <button onClick={handleCancelEdit} style={{ background: '#eee', color: '#333', border: 'none', borderRadius: 4, padding: '4px 12px', fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  {popupAnnotation.text && (
-                    <div style={{ fontSize: '0.95em', color: '#23272f', margin: '8px 0 0 0', whiteSpace: 'pre-wrap' }}>{popupAnnotation.text}</div>
-                  )}
-                  <button
-                    onClick={() => handleEditAnnotation(popupAnnotation)}
-                    style={{ marginTop: 10, background: popupAnnotation.color, color: '#fff', border: 'none', borderRadius: 4, padding: '4px 12px', fontWeight: 500, cursor: 'pointer', fontSize: '0.97em' }}
-                  >
-                    Edit
-                  </button>
-                </>
-              )}
+              {isLoading ? 'Generating...' : 'Generate Essay'}
+            </Button>
+          </TextInputWrapper>
+          <DocumentArea ref={documentRef} style={{ position: 'relative', pointerEvents: isLoading ? 'none' : 'auto' }}>
+            <div
+              style={{ whiteSpace: 'pre-wrap', lineHeight: '1.7', fontSize: '1.1rem', color: '#23272f', filter: isLoading ? 'blur(2px)' : 'none', transition: 'filter 0.2s' }}
+              onMouseUp={handleTextSelection}
+            >
+              {renderContentWithHighlights()}
             </div>
-          )}
-        </DocumentArea>
-        {/* Floating annotation toolbar outside the document */}
-        <AnnotationToolbar onSelectAnnotation={handleSelectAnnotation} />
+            {isLoading && (
+              <LoadingOverlay>
+                <Spinner />
+                <div style={{ color: '#23272f', marginTop: 8, fontWeight: 500 }}>Generating your essay...</div>
+              </LoadingOverlay>
+            )}
+            {/* Annotation popup on highlight hover, keep visible if tooltip hovered */}
+            {showPopup && popupAnnotation && popupPosition && (
+              <div
+                style={{
+                  position: 'fixed',
+                  left: popupPosition.x,
+                  top: popupPosition.y - 48,
+                  background: '#fff',
+                  border: `1.5px solid ${popupAnnotation.color}`,
+                  borderRadius: 6,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+                  padding: '0.7rem 1rem',
+                  minWidth: 200,
+                  zIndex: 2000,
+                  pointerEvents: 'auto',
+                }}
+                onMouseEnter={() => setIsTooltipHovered(true)}
+                onMouseLeave={() => {
+                  setIsTooltipHovered(false);
+                  setHoveredAnnotationId(null);
+                  setShowPopup(false);
+                }}
+              >
+                <div style={{ color: popupAnnotation.color, fontWeight: 700, marginBottom: 2 }}>{popupAnnotation.code}</div>
+                <div style={{ fontSize: '0.92em', color: '#444', marginBottom: 6 }}>{popupAnnotation.description}</div>
+                {editingAnnotationId === popupAnnotation.id ? (
+                  <>
+                    <textarea
+                      value={editText}
+                      onChange={e => setEditText(e.target.value)}
+                      style={{ width: '100%', minHeight: 60, marginBottom: 8, borderRadius: 4, border: '1px solid #ddd', padding: 6, fontSize: '1em' }}
+                      placeholder="Add specific feedback..."
+                      autoFocus
+                    />
+                    <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                      <button onClick={handleSaveEdit} style={{ background: popupAnnotation.color, color: '#fff', border: 'none', borderRadius: 4, padding: '4px 12px', fontWeight: 500, cursor: 'pointer' }}>Save</button>
+                      <button onClick={handleCancelEdit} style={{ background: '#eee', color: '#333', border: 'none', borderRadius: 4, padding: '4px 12px', fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {popupAnnotation.text && (
+                      <div style={{ fontSize: '0.95em', color: '#23272f', margin: '8px 0 0 0', whiteSpace: 'pre-wrap' }}>{popupAnnotation.text}</div>
+                    )}
+                    <button
+                      onClick={() => handleEditAnnotation(popupAnnotation)}
+                      style={{ marginTop: 10, background: popupAnnotation.color, color: '#fff', border: 'none', borderRadius: 4, padding: '4px 12px', fontWeight: 500, cursor: 'pointer', fontSize: '0.97em' }}
+                    >
+                      Edit
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </DocumentArea>
+          <AnnotationToolbar 
+            onSelectAnnotation={handleSelectAnnotation} 
+            selectedAnnotation={selectedAnnotationType}
+          />
+        </ContentColumn>
       </MainArea>
     </Container>
   );
