@@ -35,7 +35,5 @@ npm start
 
 ## Available Scripts
 
-- `npm run dev` - Start the development server
+- `npm start` - Start the development server
 - `npm run build` - Build the application for production
-- `npm run start` - Start the production server
-- `npm run lint` - Run ESLint to check for code issues
