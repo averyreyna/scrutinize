@@ -27,6 +27,12 @@ const Modal = styled.div`
   max-width: 420px;
   width: 100%;
   position: relative;
+
+  @media (max-width: 768px) {
+    max-width: 90%;
+    padding: 1.5rem 1.5rem 1.25rem 1.5rem;
+    margin: 1rem;
+  }
 `;
 
 const CloseButton = styled.button`
@@ -38,6 +44,12 @@ const CloseButton = styled.button`
   font-size: 1.3rem;
   color: #888;
   cursor: pointer;
+
+  @media (max-width: 768px) {
+    top: 12px;
+    right: 12px;
+    font-size: 1.2rem;
+  }
 `;
 
 const Title = styled.h2`
@@ -46,12 +58,23 @@ const Title = styled.h2`
   font-size: 1.3rem;
   font-weight: 700;
   color: #23272f;
+
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const List = styled.ul`
   margin: 1.2rem 0 0 0;
   padding-left: 1.2rem;
   color: #23272f;
+
+  @media (max-width: 768px) {
+    margin: 1rem 0 0 0;
+    padding-left: 1rem;
+    font-size: 0.95rem;
+  }
 `;
 
 const ExperimentInfoModal: React.FC<ExperimentInfoModalProps> = ({ isOpen, onClose }) => {

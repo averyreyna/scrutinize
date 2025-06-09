@@ -38,12 +38,21 @@ const TopBar = styled.div`
   padding: 0 2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   z-index: 10;
+
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+    height: 48px;
+  }
 `;
 
 const Title = styled.div`
   font-size: 1.1rem;
   font-weight: 600;
   flex: 1;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
 `;
 
 const Controls = styled.div`
@@ -59,6 +68,10 @@ const MainArea = styled.div`
   flex: 1;
   min-height: 0;
   padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
 const TextInputWrapper = styled.div`
@@ -66,6 +79,13 @@ const TextInputWrapper = styled.div`
   display: flex;
   justify-content: center;
   margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const TextInput = styled.input`
@@ -80,6 +100,12 @@ const TextInput = styled.input`
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    font-size: 0.95rem;
+    padding: 0.6rem 0.75rem;
   }
 `;
 
@@ -97,6 +123,13 @@ const DocumentArea = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+
+  @media (max-width: 768px) {
+    padding: 1.25rem 1rem;
+    height: calc(100vh - 4rem - 120px);
+    border-radius: 6px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
 `;
 
 const AnnotationMarker = styled.div<{ x: number; y: number; color: string }>`
@@ -122,18 +155,37 @@ const AnnotationPopup = styled.div<{ x: number; y: number }>`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   min-width: 200px;
+
+  @media (max-width: 768px) {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 320px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
 `;
 
 const Button = styled.button`
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background-color: #007bff;
+  color: white;
   border: none;
   border-radius: 4px;
-  background: #007bff;
-  color: white;
   cursor: pointer;
-  font-weight: 500;
+  transition: background-color 0.2s;
+
   &:hover {
-    background: #0056b3;
+    background-color: #0056b3;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
   }
 `;
 
