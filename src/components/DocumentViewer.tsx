@@ -200,13 +200,6 @@ const Button = styled.button`
   }
 `;
 
-const LoadingWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 1.5rem 0;
-`;
-
 const Spinner = styled.div`
   border: 4px solid #f3f3f3;
   border-top: 4px solid #007bff;
@@ -382,7 +375,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title, inputTe
         <Title>{title || 'Scrutinize: Powered by DeepSeek'}</Title>
       </TopBar>
       <MainArea>
-        <SuggestionsPanel />
+        <SuggestionsPanel annotations={annotations} />
         <ContentColumn>
           <TextInputWrapper>
             <TextInput
@@ -414,7 +407,6 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title, inputTe
                 <div style={{ color: '#23272f', marginTop: 8, fontWeight: 500 }}>Generating your essay...</div>
               </LoadingOverlay>
             )}
-            {/* Annotation popup on highlight hover, keep visible if tooltip hovered */}
             {showPopup && popupAnnotation && popupPosition && (
               <div
                 style={{
