@@ -127,8 +127,9 @@ const DocumentArea = styled.div`
   box-shadow: 0 4px 24px rgba(0,0,0,0.10);
   padding: 2.5rem 3rem;
   position: relative;
-  min-width: 0;
-  max-width: 800px;
+  width: 600px;
+  min-width: 400px;
+  max-width: 600px;
   overflow-y: auto;
   height: calc(100vh - 5rem - 80px);
   display: flex;
@@ -240,7 +241,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title, inputTe
   const [editText, setEditText] = useState('');
   const [isTooltipHovered, setIsTooltipHovered] = useState(false);
 
-  // Update highlight mouse leave to delay hiding if tooltip is hovered
+  // update highlight mouse leave to delay hiding if tooltip is hovered
   const handleHighlightMouseLeave = () => {
     setTimeout(() => {
       if (!isTooltipHovered) {
@@ -250,7 +251,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title, inputTe
     }, 80);
   };
 
-  // Helper: Render content with highlights
+  // helper: render content with highlights
   const renderContentWithHighlights = () => {
     if (annotations.length === 0) return content;
     // Sort annotations by start index
@@ -285,7 +286,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title, inputTe
     return nodes;
   };
 
-  // Handle text selection and annotation creation
+  // handle text selection and annotation creation
   const handleTextSelection = () => {
     if (!selectedAnnotationType) return;
     const selection = window.getSelection();
@@ -329,18 +330,18 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title, inputTe
     selection.removeAllRanges();
   };
 
-  // Handle annotation type selection
+  // handle annotation type selection
   const handleSelectAnnotation = (code: string, description: string, color: string) => {
     setSelectedAnnotationType({ code, description, color });
   };
 
-  // Start editing annotation
+  // start editing annotation
   const handleEditAnnotation = (annotation: Annotation) => {
     setEditingAnnotationId(annotation.id);
     setEditText(annotation.text || '');
   };
 
-  // Save annotation feedback
+  // save annotation feedback
   const handleSaveEdit = () => {
     setAnnotations(prev => {
       const updated = prev.map(ann =>
@@ -356,7 +357,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title, inputTe
     setEditText('');
   };
 
-  // Cancel editing
+  // cancel editing
   const handleCancelEdit = () => {
     setEditingAnnotationId(null);
     setEditText('');

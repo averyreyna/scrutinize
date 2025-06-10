@@ -30,7 +30,7 @@ export const generateEssay = async (topic: string): Promise<string> => {
         messages: [
           {
             role: 'system',
-            content: 'You are an expert essay writer. Write a well-structured, engaging essay on the given topic. Include an introduction, body paragraphs, and a conclusion.'
+            content: 'You are an expert essay writer. Write a well-structured, engaging essay on the given topic. Include an introduction, body paragraphs, and a conclusion. Return the essay in plain text format without any markdown formatting or special characters.'
           },
           {
             role: 'user',
