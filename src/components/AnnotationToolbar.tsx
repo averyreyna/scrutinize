@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { theme } from '../theme';
 
-// Define our annotation groups based on OSP editing codes
 export const ANNOTATION_GROUPS = {
   STRUCTURE: {
     name: 'Structure & Flow',
-    color: '#4A90E2', // Blue
+    color: '#4A90E2',
     codes: [
       { code: 'LEDE', description: 'Lead with the main point' },
       { code: 'FLOW', description: 'Improve logical flow' },
@@ -15,7 +15,7 @@ export const ANNOTATION_GROUPS = {
   },
   CLARITY: {
     name: 'Clarity & Precision',
-    color: '#50E3C2', // Teal
+    color: '#50E3C2',
     codes: [
       { code: 'CLEAR', description: 'Clarify meaning' },
       { code: 'AMBIG', description: 'Remove ambiguity' },
@@ -25,7 +25,7 @@ export const ANNOTATION_GROUPS = {
   },
   STYLE: {
     name: 'Style & Tone',
-    color: '#F5A623', // Orange
+    color: '#F5A623',
     codes: [
       { code: 'TONE', description: 'Adjust tone' },
       { code: 'BRAND', description: 'Match brand voice' },
@@ -35,7 +35,7 @@ export const ANNOTATION_GROUPS = {
   },
   INCLUSION: {
     name: 'Inclusion & Impact',
-    color: '#BD10E0', // Purple
+    color: '#BD10E0',
     codes: [
       { code: 'INCL', description: 'Use inclusive language' },
       { code: 'EMPATH', description: 'Consider audience' },
@@ -45,7 +45,7 @@ export const ANNOTATION_GROUPS = {
   },
   ACCURACY: {
     name: 'Accuracy & Evidence',
-    color: '#D0021B', // Red
+    color: '#D0021B',
     codes: [
       { code: 'FACT', description: 'Support with evidence' },
       { code: 'EXMPL', description: 'Add examples' },
@@ -60,8 +60,8 @@ interface AnnotationToolbarProps {
   selectedAnnotation?: { code: string; description: string; color: string } | null;
 }
 
-const SIDEBAR_OFFSET_VISIBLE = 64; // px from right edge for the sidebar
-const SIDEBAR_OFFSET_TOGGLE = '1rem'; // original toggle position
+const SIDEBAR_OFFSET_VISIBLE = 64;
+const SIDEBAR_OFFSET_TOGGLE = '1rem';
 const SIDEBAR_WIDTH = 170;
 const SIDEBAR_MAX_HEIGHT = '80vh';
 
@@ -75,14 +75,14 @@ const ToolbarContainer = styled.div<{ isVisible: boolean }>`
   max-width: ${SIDEBAR_WIDTH}px;
   max-height: ${SIDEBAR_MAX_HEIGHT};
   overflow-y: auto;
-  background: #f8f9fbf7;
-  border-left: 1px solid #e1e4e8;
+  background: ${theme.colors.surface};
+  border-left: 1px solid ${theme.colors.border};
   border-radius: 8px;
   padding: 1.5rem 0.3rem 0.3rem 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
-  z-index: 1200;
+  z-index: ${theme.zIndex.toolbar};
   font-size: 0.85rem;
   align-items: flex-start;
   transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
@@ -95,12 +95,12 @@ const ToggleButton = styled.button`
   right: ${SIDEBAR_OFFSET_TOGGLE};
   top: 50%;
   transform: translateY(-50%);
-  background: #f8f9fbf7;
-  border: 1px solid #e1e4e8;
+  background: ${theme.colors.surface};
+  border: 1px solid ${theme.colors.border};
   border-radius: 8px;
   padding: 0.5rem;
   cursor: pointer;
-  z-index: 1201;
+  z-index: ${theme.zIndex.toolbarToggle};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -108,13 +108,13 @@ const ToggleButton = styled.button`
   transition: background 0.2s;
 
   &:hover {
-    background: #fff;
+    background: ${theme.colors.white};
   }
 
   svg {
     width: 20px;
     height: 20px;
-    fill: #23272f;
+    fill: ${theme.colors.text};
   }
 `;
 
@@ -170,7 +170,7 @@ const AnnotationButton = styled.button<{ color: string; isSelected: boolean }>`
   }
 `;
 
-const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({ onSelectAnnotation, selectedAnnotation }) => {
+const AnnotationToolbar: React.FC<AnnotationToolbarProps> = React.memo(({ onSelectAnnotation, selectedAnnotation }) => {
   const [isVisible, setIsVisible] = useState(true);
 
   return (
@@ -204,6 +204,8 @@ const AnnotationToolbar: React.FC<AnnotationToolbarProps> = ({ onSelectAnnotatio
       </ToolbarContainer>
     </>
   );
-};
+});
+
+AnnotationToolbar.displayName = 'AnnotationToolbar';
 
 export default AnnotationToolbar; 

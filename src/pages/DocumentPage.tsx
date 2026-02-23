@@ -3,6 +3,7 @@ import DocumentViewer from '../components/DocumentViewer';
 import { generateEssay } from '../services/deepseek';
 import ExperimentInfoModal from '../components/ExperimentInfoModal';
 import styled from 'styled-components';
+import { DEFAULT_SAMPLE_ESSAY, theme } from '../theme';
 
 const InfoIcon = styled.span`
   display: inline-flex;
@@ -24,15 +25,15 @@ const FloatingButton = styled.button`
   left: 24px;
   bottom: 24px;
   background: #fff;
-  color: #23272f;
-  border: 1px solid #e1e4e8;
+  color: ${theme.colors.text};
+  border: 1px solid ${theme.colors.border};
   border-radius: 6px;
   padding: 0.4rem 0.9rem;
   font-size: 0.85rem;
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   cursor: pointer;
-  z-index: 1200;
+  z-index: ${theme.zIndex.toolbar};
   transition: background 0.15s;
   &:hover {
     background: #f5f6fa;
@@ -41,7 +42,7 @@ const FloatingButton = styled.button`
 
 const DocumentPage: React.FC = () => {
   const [inputText, setInputText] = useState('');
-  const [content, setContent] = useState(`# Sample Essay\n\nThis is a sample essay that demonstrates the document viewer functionality. You can click the "Add Annotation" button in the toolbar and then click anywhere in the document to add annotations.\n\nThe document viewer supports:\n- Adding annotations at specific points\n- Editing annotation text\n- Viewing all annotations\n- Clean and modern UI\n\nFeel free to experiment with the annotation features!`);
+  const [content, setContent] = useState(DEFAULT_SAMPLE_ESSAY);
   const [isLoading, setIsLoading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 

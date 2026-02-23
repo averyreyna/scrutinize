@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { theme } from '../theme';
 
 interface ExperimentInfoModalProps {
   isOpen: boolean;
@@ -28,7 +29,7 @@ const Modal = styled.div`
   width: 100%;
   position: relative;
 
-  @media (max-width: 768px) {
+  @media (max-width: ${theme.breakpoints.mobile}px) {
     max-width: 90%;
     padding: 1.5rem 1.5rem 1.25rem 1.5rem;
     margin: 1rem;
@@ -45,7 +46,7 @@ const CloseButton = styled.button`
   color: #888;
   cursor: pointer;
 
-  @media (max-width: 768px) {
+  @media (max-width: ${theme.breakpoints.mobile}px) {
     top: 12px;
     right: 12px;
     font-size: 1.2rem;
@@ -57,9 +58,9 @@ const Title = styled.h2`
   margin-bottom: 1.2rem;
   font-size: 1.3rem;
   font-weight: 700;
-  color: #23272f;
+  color: ${theme.colors.text};
 
-  @media (max-width: 768px) {
+  @media (max-width: ${theme.breakpoints.mobile}px) {
     font-size: 1.2rem;
     margin-bottom: 1rem;
   }
@@ -68,9 +69,9 @@ const Title = styled.h2`
 const List = styled.ul`
   margin: 1.2rem 0 0 0;
   padding-left: 1.2rem;
-  color: #23272f;
+  color: ${theme.colors.text};
 
-  @media (max-width: 768px) {
+  @media (max-width: ${theme.breakpoints.mobile}px) {
     margin: 1rem 0 0 0;
     padding-left: 1rem;
     font-size: 0.95rem;

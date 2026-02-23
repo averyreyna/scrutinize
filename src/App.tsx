@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DocumentPage from './pages/DocumentPage';
 import MobileWarning from './components/MobileWarning';
 import styled from 'styled-components';
+import { theme } from './theme';
 
 const AppContainer = styled.div`
   display: flex;
@@ -13,7 +14,7 @@ function App() {
   const [showMobileWarning, setShowMobileWarning] = useState(false);
 
   useEffect(() => {
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = window.innerWidth <= theme.breakpoints.mobile;
     if (isMobile) {
       setShowMobileWarning(true);
     }
