@@ -2,7 +2,9 @@
 
 Scrutinize is an experimental document analysis and annotation tool designed to help you analyze and improve your writing through AI-powered insights and interactive annotations. The tool uses DeepSeek's model to generate essays and provides a sophisticated document viewer with annotation capabilities, allowing you to mark up text, add notes, and track your analysis—all while maintaining a clean and modern interface.
 
-![](scrutinize.gif)
+<p align="center">
+  <img src="scrutinize.gif" />
+</p>
 
 ## Prerequisites
 
