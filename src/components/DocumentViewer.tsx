@@ -193,6 +193,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title, inputTe
   const isTooltipHoveredRef = useRef(isTooltipHovered);
   isTooltipHoveredRef.current = isTooltipHovered;
 
+  // ref used in setTimeout so we see current hover state (closure would see stale value)
   const handleHighlightMouseLeave = useCallback(() => {
     setTimeout(() => {
       if (!isTooltipHoveredRef.current) {
@@ -260,6 +261,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ content, title, inputTe
       start = idx;
       end = idx + selectedText.length;
     }
+    // prevent overlapping annotations
     if (annotations.some(a => (start < a.end && end > a.start))) {
       selection.removeAllRanges();
       setSelectedAnnotationType(null);
