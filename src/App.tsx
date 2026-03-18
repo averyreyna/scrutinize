@@ -25,9 +25,6 @@ function App() {
   if (!isUnlocked) {
     return (
       <AppContainer>
-        {showMobileWarning && (
-          <MobileWarning onDismiss={() => setShowMobileWarning(false)} />
-        )}
         <PasswordGate onUnlock={() => setIsUnlocked(true)} />
       </AppContainer>
     );
