@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useEffect, useState, FormEvent } from 'react';
 import styled from 'styled-components';
 
 interface PasswordGateProps {
@@ -6,12 +6,15 @@ interface PasswordGateProps {
 }
 
 const PageWrapper = styled.div`
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f3f4f6;
   padding: 1rem; /* p-4 */
+  overflow: hidden;
 `;
 
 const Card = styled.div`
@@ -64,9 +67,26 @@ const Description = styled.p`
   color: #4b5563; /* text-gray-600 */
 `;
 
+const InputWrapper = styled.div`
+  position: relative;
+  width: 100%; /* w-full */
+`;
+
+const ValidationIcon = styled.span<{ $variant: 'valid' | 'invalid' }>`
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  color: ${(p) => (p.$variant === 'valid' ? '#50E3C2' : '#ef4444')};
+`;
+
 const Input = styled.input`
   width: 100%; /* w-full */
-  padding: 0.5rem; /* p-2 */
+  padding: 0.5rem 2rem 0.5rem 0.5rem; /* p-2, leave room for icon */
   border: 1px solid #d1d5db; /* border-gray-300 */
   border-radius: 0.375rem; /* rounded-md */
   margin-bottom: 0.75rem; /* mb-3 */
@@ -137,12 +157,31 @@ const PasswordGate: React.FC<PasswordGateProps> = ({ onUnlock }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasAttempted, setHasAttempted] = useState(false);
 
   const secret = process.env.REACT_APP_PASSWORD_GATE_SECRET;
 
+  useEffect(() => {
+    // Keep the password gate stationary; avoid accidental scroll while it's the only screen.
+    if (typeof document === 'undefined') return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  const trimmed = password.trim();
+  const secretConfigured = Boolean(secret);
+  const isValid = secretConfigured && trimmed.length > 0 && trimmed === secret;
+  const showInvalidIcon =
+    hasAttempted && trimmed.length > 0 && secretConfigured && !isValid;
+
   const submitPassword = () => {
-    const trimmed = password.trim();
     if (!trimmed || isSubmitting) return;
+    setHasAttempted(true);
 
     if (!secret) {
       setError('Password is not configured.');
@@ -161,6 +200,16 @@ const PasswordGate: React.FC<PasswordGateProps> = ({ onUnlock }) => {
     setError('Incorrect password. Please try again.');
     setIsSubmitting(false);
   };
+
+  useEffect(() => {
+    // If the user edits after a failed attempt, clear the error when the password becomes valid.
+    if (!hasAttempted || !secretConfigured) return;
+    if (!trimmed) {
+      setError(null);
+      return;
+    }
+    if (trimmed === secret) setError(null);
+  }, [hasAttempted, secret, secretConfigured, trimmed]);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -192,15 +241,50 @@ const PasswordGate: React.FC<PasswordGateProps> = ({ onUnlock }) => {
         </Description>
 
         <form onSubmit={handleSubmit}>
-          <Input
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={handleKeyDown}
-            autoFocus
-            aria-label="Access password"
-          />
+          <InputWrapper>
+            <Input
+              type="password"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              aria-label="Access password"
+            />
+            {(isValid || showInvalidIcon) && (
+              <ValidationIcon $variant={isValid ? 'valid' : 'invalid'}>
+                {isValid ? (
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M4 10.5l3.2 3.2L16 5.9" />
+                  </svg>
+                ) : (
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M6 6l8 8M14 6l-8 8" />
+                  </svg>
+                )}
+              </ValidationIcon>
+            )}
+          </InputWrapper>
 
           {error && (
             <ErrorText role="alert">{error}</ErrorText>
