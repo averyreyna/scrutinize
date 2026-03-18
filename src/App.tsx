@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DocumentPage from './pages/DocumentPage';
 import MobileWarning from './components/MobileWarning';
+import PasswordGate from './components/PasswordGate';
 import styled from 'styled-components';
 import { theme } from './theme';
 
@@ -12,6 +13,7 @@ const AppContainer = styled.div`
 
 function App() {
   const [showMobileWarning, setShowMobileWarning] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
 
   useEffect(() => {
     const isMobile = window.innerWidth <= theme.breakpoints.mobile;
@@ -20,9 +22,22 @@ function App() {
     }
   }, []);
 
+  if (!isUnlocked) {
+    return (
+      <AppContainer>
+        {showMobileWarning && (
+          <MobileWarning onDismiss={() => setShowMobileWarning(false)} />
+        )}
+        <PasswordGate onUnlock={() => setIsUnlocked(true)} />
+      </AppContainer>
+    );
+  }
+
   return (
     <AppContainer>
-      {showMobileWarning && <MobileWarning onDismiss={() => setShowMobileWarning(false)} />}
+      {showMobileWarning && (
+        <MobileWarning onDismiss={() => setShowMobileWarning(false)} />
+      )}
       <DocumentPage />
     </AppContainer>
   );
