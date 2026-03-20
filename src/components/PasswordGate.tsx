@@ -67,26 +67,9 @@ const Description = styled.p`
   color: #4b5563; /* text-gray-600 */
 `;
 
-const InputWrapper = styled.div`
-  position: relative;
+const Input = styled.input<{ $state: 'none' | 'valid' | 'invalid' }>`
   width: 100%; /* w-full */
-`;
-
-const ValidationIcon = styled.span<{ $variant: 'valid' | 'invalid' }>`
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  color: ${(p) => (p.$variant === 'valid' ? '#50E3C2' : '#ef4444')};
-`;
-
-const Input = styled.input`
-  width: 100%; /* w-full */
-  padding: 0.5rem 2rem 0.5rem 0.5rem; /* p-2, leave room for icon */
+  padding: 0.5rem; /* p-2 */
   border: 1px solid #d1d5db; /* border-gray-300 */
   border-radius: 0.375rem; /* rounded-md */
   margin-bottom: 0.75rem; /* mb-3 */
@@ -95,6 +78,20 @@ const Input = styled.input`
   background-color: #ffffff;
   box-sizing: border-box;
   display: block;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  ${(p) =>
+    p.$state === 'valid' &&
+    `
+    border-color: #50E3C2;
+    box-shadow: 0 0 0 2px rgba(80, 227, 194, 0.35);
+  `}
+  ${(p) =>
+    p.$state === 'invalid' &&
+    `
+    border-color: #ef4444;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+  `}
 
   &::placeholder {
     color: #9ca3af;
@@ -102,19 +99,26 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #3b82f6; /* blue-500 */
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4); /* focus:ring */
+    ${(p) =>
+      p.$state === 'valid'
+        ? `
+      border-color: #50E3C2;
+      box-shadow: 0 0 0 2px rgba(80, 227, 194, 0.45);
+    `
+        : p.$state === 'invalid'
+          ? `
+      border-color: #ef4444;
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.4);
+    `
+          : `
+      border-color: #3b82f6; /* blue-500 */
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4); /* focus:ring */
+    `}
   }
 
   @media (min-width: 640px) {
     font-size: 1rem; /* sm:text-base */
   }
-`;
-
-const ErrorText = styled.p`
-  margin: 0 0 0.75rem 0; /* mb-3 */
-  font-size: 0.875rem; /* text-sm */
-  color: #ef4444; /* text-red-500 */
 `;
 
 const UnlockButton = styled.button<{ $disabled: boolean }>`
@@ -147,15 +151,8 @@ const UnlockButton = styled.button<{ $disabled: boolean }>`
   }
 `;
 
-const NoteText = styled.p`
-  margin: 1rem 0 0 0; /* mt-4 */
-  font-size: 0.6875rem; /* text-[11px] */
-  color: #9ca3af; /* text-gray-400 */
-`;
-
 const PasswordGate: React.FC<PasswordGateProps> = ({ onUnlock }) => {
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasAttempted, setHasAttempted] = useState(false);
 
@@ -176,40 +173,33 @@ const PasswordGate: React.FC<PasswordGateProps> = ({ onUnlock }) => {
   const trimmed = password.trim();
   const secretConfigured = Boolean(secret);
   const isValid = secretConfigured && trimmed.length > 0 && trimmed === secret;
-  const showInvalidIcon =
-    hasAttempted && trimmed.length > 0 && secretConfigured && !isValid;
+  const showInvalid =
+    hasAttempted && trimmed.length > 0 && !isValid;
+
+  const validationState: 'none' | 'valid' | 'invalid' = isValid
+    ? 'valid'
+    : showInvalid
+      ? 'invalid'
+      : 'none';
 
   const submitPassword = () => {
     if (!trimmed || isSubmitting) return;
     setHasAttempted(true);
 
     if (!secret) {
-      setError('Password is not configured.');
       return;
     }
 
     setIsSubmitting(true);
 
     if (trimmed === secret) {
-      setError(null);
       setIsSubmitting(false);
       onUnlock();
       return;
     }
 
-    setError('Incorrect password. Please try again.');
     setIsSubmitting(false);
   };
-
-  useEffect(() => {
-    // If the user edits after a failed attempt, clear the error when the password becomes valid.
-    if (!hasAttempted || !secretConfigured) return;
-    if (!trimmed) {
-      setError(null);
-      return;
-    }
-    if (trimmed === secret) setError(null);
-  }, [hasAttempted, secret, secretConfigured, trimmed]);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -241,54 +231,17 @@ const PasswordGate: React.FC<PasswordGateProps> = ({ onUnlock }) => {
         </Description>
 
         <form onSubmit={handleSubmit}>
-          <InputWrapper>
-            <Input
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={handleKeyDown}
-              autoFocus
-              aria-label="Access password"
-            />
-            {(isValid || showInvalidIcon) && (
-              <ValidationIcon $variant={isValid ? 'valid' : 'invalid'}>
-                {isValid ? (
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M4 10.5l3.2 3.2L16 5.9" />
-                  </svg>
-                ) : (
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M6 6l8 8M14 6l-8 8" />
-                  </svg>
-                )}
-              </ValidationIcon>
-            )}
-          </InputWrapper>
-
-          {error && (
-            <ErrorText role="alert">{error}</ErrorText>
-          )}
+          <Input
+            type="password"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            aria-label="Access password"
+            aria-invalid={validationState === 'invalid'}
+            $state={validationState}
+          />
 
           <UnlockButton
             type="submit"
@@ -298,11 +251,6 @@ const PasswordGate: React.FC<PasswordGateProps> = ({ onUnlock }) => {
           >
             {isSubmitting ? 'Checking...' : 'Unlock'}
           </UnlockButton>
-
-          <NoteText>
-            Note: This is a frontend-only password gate intended for light
-            protection, not strong security.
-          </NoteText>
         </form>
       </Card>
     </PageWrapper>
